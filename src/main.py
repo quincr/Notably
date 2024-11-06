@@ -21,7 +21,7 @@ pressable = Pressable((50, 200), (50, 25), (128, 0, 0), (0, 128, 0), (0, 0, 128)
 
 container = Container((150, 150), (100, 100))
 container_text = Text(font, 'This text is in the container', 16, (255, 255, 255), (2, 2))
-container_pressable = Pressable(pg.Vector2(5, 60), pg.Vector2(20, 25), (128, 0, 128), (128, 128, 0), (0, 128, 128), TestPressContainerEvent)
+container_pressable = Pressable(pg.Vector2(5, 90), pg.Vector2(25, 25), (128, 0, 128), (128, 128, 0), (0, 128, 128), TestPressContainerEvent)
 container.AddElement(container_text)
 container.AddElement(container_pressable)
 

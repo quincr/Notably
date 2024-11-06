@@ -169,7 +169,6 @@ class VerticalLayout(BaseElement):
         surface.blit(container_surface, self.position)
 
 
-
 class Text(BaseElement):
     def __init__(
         self: Text,
@@ -193,10 +192,16 @@ class Text(BaseElement):
     def Render(self: Text, surface: pg.Surface, max_width: int = -1) -> None:
         if max_width <= 0:
             surface.blit(self._renderred, self.position)
+
+            if DEBUG_RENDER:
+                pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self._renderred.get_size()), 1)
             return
 
         if self._renderred.get_width() <= max_width:
             surface.blit(self._renderred, self.position)
+
+            if DEBUG_RENDER:
+                pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self._renderred.get_size()), 1)
             return
 
         remaining_words = self.text.split(" ")
@@ -233,10 +238,15 @@ class Text(BaseElement):
                 current_line = ""
                 current_width = 0
 
+        last_line = self.font.Get(self.size).render(current_line, True, self.color)
+
         surface.blit(
-            self.font.Get(self.size).render(current_line, True, self.color),
+            last_line,
             self.position + pg.Vector2(0, current_y),
         )
+
+        if DEBUG_RENDER:
+            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, (max_width, current_y + last_line.get_height())), 1)
 
 
 class Box(BaseElement):
@@ -254,6 +264,9 @@ class Box(BaseElement):
 
     def Render(self: Box, surface: pg.Surface) -> None:
         pg.draw.rect(surface, self.color, (self.position, self.size))
+
+        if DEBUG_RENDER:
+            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self.size), 1)
 
 
 class Pressable(BaseElement):
@@ -295,3 +308,6 @@ class Pressable(BaseElement):
                 _color = self.hover_color
 
         pg.draw.rect(surface, _color, (self.position, self.size))
+
+        if DEBUG_RENDER:
+            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self.size), 1)

@@ -5,21 +5,17 @@ pg.init()
 from gui import Box, Container, Font, Manager, Pressable, Text, VerticalLayout
 
 display = pg.display.set_mode((800, 600))
-
 manager = Manager()
 
 
 def TestPressEvent(pressable: Pressable, test_arg_1: int, test_arg_2: str) -> None:
     print("Pressable field has been pressed.", test_arg_1, test_arg_2)
 
-
 def TestPressContainerEvent(pressable: Pressable) -> None:
     print("Container Pressable field has been pressed.")
 
-
 def TestPressVLayoutEvent(pressable: Pressable) -> None:
     print("Vertical layout Pressable field has been pressed.")
-
 
 font = Font("./assets/fonts/Garet-Book.ttf")
 text = Text(font, "This is test text.", 24, (255, 255, 255), pg.Vector2(5, 5))

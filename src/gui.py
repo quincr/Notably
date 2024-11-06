@@ -3,7 +3,19 @@ from __future__ import annotations
 from typing import Any, Callable
 
 import pygame as pg
+import os
+import time
 
+DEBUG_RENDER = True #os.getenv('NGUI_DO_DEBUG_RENDER') != None
+
+def _getDebugColor(v: int) -> pg.Color:
+    v += int(time.time())
+
+    return pg.Color(
+        (v * 2632.255) % 255,
+        (v * (3727 + v % 17)) % 255,
+        (v * (1822 * (v % 6))) % 255
+    )
 
 class Manager:
     def __init__(self: Manager) -> None:
@@ -94,8 +106,7 @@ class Container(BaseElement):
             element.Tick()
 
     def Render(self: Container, surface: pg.Surface) -> None:
-        container_surface = pg.Surface(self.size)
-        container_surface.fill((0, 128, 255))
+        container_surface = pg.Surface(self.size, pg.SRCALPHA)
 
         for element in self.elements:
             if type(element) == Text:
@@ -106,7 +117,57 @@ class Container(BaseElement):
 
             element.Render(container_surface)
 
+        if DEBUG_RENDER:
+            pg.draw.rect(container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1)
+
         surface.blit(container_surface, self.position)
+
+
+class VerticalLayout(BaseElement):
+    def __init__(self: VerticalLayout, position: pg.Vector2, size: pg.Vector2, scrollable: bool = False) -> None:
+        self.position = position
+        self.size = size
+        
+        self.elements: list[type[BaseElement]] = []
+
+    def AddElement(self: VerticalLayout, element: type[BaseElement]) -> None:
+        self.elements.append(element)
+
+    def IsMouseHovering(self: Container) -> bool:
+        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(
+            *pg.mouse.get_pos()
+        )
+
+    def Tick(self: VerticalLayout) -> None:
+        is_pressing = pg.mouse.get_pressed(3)[0]
+        just_pressed = pg.mouse.get_just_pressed()[0]
+        is_hovering_container = self.IsMouseHovering()
+
+        for element in self.elements:
+            element.is_hovering = is_hovering_container and element.IsMouseHovering()
+            element.is_pressed = is_pressing and element.is_hovering
+            element.is_just_pressed = just_pressed and element.is_hovering
+            element.relative_position = self.relative_position + self.position
+
+            element.Tick()
+
+    def Render(self: VerticalLayout, surface: pg.Surface) -> None:
+        container_surface = pg.Surface(self.size, pg.SRCALPHA)
+
+        for element in self.elements:
+            if type(element) == Text:
+                element.Render(
+                    container_surface, max_width=self.size[0] - element.position.x
+                )
+                continue
+
+            element.Render(container_surface)
+
+        if DEBUG_RENDER:
+            pg.draw.rect(container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1)
+
+        surface.blit(container_surface, self.position)
+
 
 
 class Text(BaseElement):

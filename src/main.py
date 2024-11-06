@@ -2,7 +2,7 @@ import pygame as pg
 
 pg.init()
 
-from gui import Box, Container, Font, Manager, Pressable, Text
+from gui import Box, Container, Font, Manager, Pressable, Text, VerticalLayout
 
 display = pg.display.set_mode((800, 600))
 
@@ -35,8 +35,8 @@ container_text = Text(
     font, "This text is in the container", 16, (255, 255, 255), (2, 2)
 )
 container_pressable = Pressable(
-    pg.Vector2(5, 90),
-    pg.Vector2(25, 25),
+    (5, 90),
+    (25, 25),
     (128, 0, 128),
     (128, 128, 0),
     (0, 128, 128),
@@ -45,11 +45,25 @@ container_pressable = Pressable(
 container.AddElement(container_text)
 container.AddElement(container_pressable)
 
+vlayout = VerticalLayout(
+    (275, 150),
+    (200, 200)
+)
+
+vlayout.AddElement(
+    Box(
+        (0, 0),
+        (255, 255, 0),
+        (50, 50)
+    )
+)
+
 manager.AddElement(text)
 manager.AddElement(box)
 manager.AddElement(pressable)
 
 manager.AddElement(container)
+manager.AddElement(vlayout)
 
 running = True
 while running:

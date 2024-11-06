@@ -28,3 +28,16 @@ class Text():
     
     def Render(self: Text, surface: pg.Surface) -> None:
         surface.blit(self._renderred, self.position)
+
+
+class Box():
+    def __init__(self: Box, position: pg.Vector2, color: pg.Color, size: pg.Vector2) -> None:
+        self.position = position
+        self.color = color
+        self.size = size
+    
+    def IsMouseHovering(self: Box) -> bool:
+        return pg.Rect(self.position, self.size).collidepoint(*pg.mouse.get_pos())
+
+    def Render(self: Box, surface: pg.Surface) -> None:
+        pg.draw.rect(surface, self.color, (self.position, self.size))

@@ -1,21 +1,21 @@
 from __future__ import annotations
 
+import os
+import time
 from typing import Any, Callable
 
 import pygame as pg
-import os
-import time
 
-DEBUG_RENDER = True #os.getenv('NGUI_DO_DEBUG_RENDER') != None
+DEBUG_RENDER = True  # os.getenv('NGUI_DO_DEBUG_RENDER') != None
+
 
 def _getDebugColor(v: int) -> pg.Color:
     v += int(time.time())
 
     return pg.Color(
-        (v * 2632.255) % 255,
-        (v * (3727 + v % 17)) % 255,
-        (v * (1822 * (v % 6))) % 255
+        (v * 2632.255) % 255, (v * (3727 + v % 17)) % 255, (v * (1822 * (v % 6))) % 255
     )
+
 
 class Manager:
     def __init__(self: Manager) -> None:
@@ -72,7 +72,7 @@ class BaseElement:
         # Required!
 
         raise NotImplementedError()
-    
+
     def GetWidth(self: BaseElement) -> int:
         # Required!
 
@@ -132,16 +132,23 @@ class Container(BaseElement):
             element.Render(container_surface)
 
         if DEBUG_RENDER:
-            pg.draw.rect(container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1)
+            pg.draw.rect(
+                container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1
+            )
 
         surface.blit(container_surface, self.position)
 
 
 class VerticalLayout(BaseElement):
-    def __init__(self: VerticalLayout, position: pg.Vector2, size: pg.Vector2, scrollable: bool = False) -> None:
+    def __init__(
+        self: VerticalLayout,
+        position: pg.Vector2,
+        size: pg.Vector2,
+        scrollable: bool = False,
+    ) -> None:
         self.position = position
         self.size = size
-        
+
         self.elements: list[type[BaseElement]] = []
 
     def AddElement(self: VerticalLayout, element: type[BaseElement]) -> None:
@@ -160,8 +167,14 @@ class VerticalLayout(BaseElement):
         y_offset = 0
 
         for element in self.elements:
-            element.relative_position = self.relative_position + pg.Vector2(element.position)
-            element.absolute_position = self.absolute_position + pg.Vector2(element.position) + pg.Vector2(0, y_offset)
+            element.relative_position = self.relative_position + pg.Vector2(
+                element.position
+            )
+            element.absolute_position = (
+                self.absolute_position
+                + pg.Vector2(element.position)
+                + pg.Vector2(0, y_offset)
+            )
 
             element.is_hovering = is_hovering_container and element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
@@ -188,7 +201,9 @@ class VerticalLayout(BaseElement):
             y_offset += element.GetHeight()
 
         if DEBUG_RENDER:
-            pg.draw.rect(container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1)
+            pg.draw.rect(
+                container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1
+            )
 
         surface.blit(container_surface, self.position)
 
@@ -218,14 +233,24 @@ class Text(BaseElement):
             surface.blit(self._renderred, self.position)
 
             if DEBUG_RENDER:
-                pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self._renderred.get_size()), 1)
+                pg.draw.rect(
+                    surface,
+                    _getDebugColor(id(self)),
+                    (self.position, self._renderred.get_size()),
+                    1,
+                )
             return
 
         if self._renderred.get_width() <= max_width:
             surface.blit(self._renderred, self.position)
 
             if DEBUG_RENDER:
-                pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self._renderred.get_size()), 1)
+                pg.draw.rect(
+                    surface,
+                    _getDebugColor(id(self)),
+                    (self.position, self._renderred.get_size()),
+                    1,
+                )
             return
 
         remaining_words = self.text.split(" ")
@@ -270,7 +295,12 @@ class Text(BaseElement):
         )
 
         if DEBUG_RENDER:
-            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, (max_width, current_y + last_line.get_height())), 1)
+            pg.draw.rect(
+                surface,
+                _getDebugColor(id(self)),
+                (self.position, (max_width, current_y + last_line.get_height())),
+                1,
+            )
 
 
 class Box(BaseElement):
@@ -293,10 +323,17 @@ class Box(BaseElement):
         return self.size.y
 
     def Render(self: Box, surface: pg.Surface) -> None:
-        pg.draw.rect(surface, self.color, (self.position + self.relative_position, self.size))
+        pg.draw.rect(
+            surface, self.color, (self.position + self.relative_position, self.size)
+        )
 
         if DEBUG_RENDER:
-            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position + self.relative_position, self.size), 1)
+            pg.draw.rect(
+                surface,
+                _getDebugColor(id(self)),
+                (self.position + self.relative_position, self.size),
+                1,
+            )
 
 
 class Pressable(BaseElement):
@@ -343,7 +380,14 @@ class Pressable(BaseElement):
             else:
                 _color = self.hover_color
 
-        pg.draw.rect(surface, _color, (self.position + self.relative_position, self.size))
+        pg.draw.rect(
+            surface, _color, (self.position + self.relative_position, self.size)
+        )
 
         if DEBUG_RENDER:
-            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position + self.relative_position, self.size), 1)
+            pg.draw.rect(
+                surface,
+                _getDebugColor(id(self)),
+                (self.position + self.relative_position, self.size),
+                1,
+            )

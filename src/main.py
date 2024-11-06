@@ -63,6 +63,17 @@ vlayout.AddElement(
     )
 )
 
+vlayout.AddElement(
+    Pressable(
+        (30, 0),
+        (25, 25),
+        (128, 0, 56),
+        (56, 128, 0),
+        (128, 56, 0),
+        TestPressVLayoutEvent,
+    )
+)
+
 manager.AddElement(text)
 manager.AddElement(box)
 manager.AddElement(pressable)

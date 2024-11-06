@@ -9,7 +9,7 @@ from .text import Text
 
 class Container(BaseElement):
     def __init__(self: Container, position: pg.Vector2, size: pg.Vector2) -> None:
-        self.position = position
+        self.position = pg.Vector2(position)
         self.size = size
 
         self.elements: list[type[BaseElement]] = []

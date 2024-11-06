@@ -14,7 +14,7 @@ class VerticalLayout(BaseElement):
         size: pg.Vector2,
         scrollable: bool = False,
     ) -> None:
-        self.position = position
+        self.position = pg.Vector2(position)
         self.size = size
 
         self.elements: list[type[BaseElement]] = []
@@ -35,9 +35,10 @@ class VerticalLayout(BaseElement):
         y_offset = 0
 
         for element in self.elements:
-            element.relative_position = self.relative_position + pg.Vector2(
+            element.relative_position = pg.Vector2(
                 element.position
             )
+
             element.absolute_position = (
                 self.absolute_position
                 + pg.Vector2(element.position)
@@ -66,7 +67,7 @@ class VerticalLayout(BaseElement):
                 continue
 
             element.Render(container_surface)
-            y_offset += element.GetHeight()
+            y_offset += element.GetHeight() + element.position.y
 
         if DEBUG_RENDER:
             pg.draw.rect(

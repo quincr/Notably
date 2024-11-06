@@ -20,7 +20,9 @@ class Manager:
             element.is_hovering = element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
             element.is_just_pressed = just_pressed and element.is_hovering
+
             element.absolute_position = element.position
+            element.relative_position = element.position.copy()
 
             element.Tick()
 

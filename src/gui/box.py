@@ -10,7 +10,7 @@ class Box(BaseElement):
     def __init__(
         self: Box, position: pg.Vector2, color: pg.Color, size: pg.Vector2
     ) -> None:
-        self.position = position
+        self.position = pg.Vector2(position)
         self.color = color
         self.size = pg.Vector2(size)
 

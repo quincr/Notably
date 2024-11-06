@@ -19,7 +19,7 @@ class Pressable(BaseElement):
         event: Callable,
         event_args: tuple[Any] = (),
     ) -> None:
-        self.position = position
+        self.position = pg.Vector2(position)
         self.size = pg.Vector2(size)
 
         self.passive_color = passive_color
@@ -53,13 +53,13 @@ class Pressable(BaseElement):
                 _color = self.hover_color
 
         pg.draw.rect(
-            surface, _color, (self.position + self.relative_position, self.size)
+            surface, _color, (self.relative_position, self.size)
         )
 
         if DEBUG_RENDER:
             pg.draw.rect(
                 surface,
                 _getDebugColor(id(self)),
-                (self.position + self.relative_position, self.size),
+                (self.relative_position, self.size),
                 1,
             )

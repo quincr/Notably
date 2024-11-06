@@ -101,7 +101,7 @@ class Container(BaseElement):
             element.is_hovering = is_hovering_container and element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
             element.is_just_pressed = just_pressed and element.is_hovering
-            element.relative_position = self.relative_position + self.position
+            element.relative_position = self.relative_position + element.position
 
             element.Tick()
 
@@ -147,14 +147,18 @@ class VerticalLayout(BaseElement):
             element.is_hovering = is_hovering_container and element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
             element.is_just_pressed = just_pressed and element.is_hovering
-            element.relative_position = self.relative_position + self.position
+            element.relative_position = self.relative_position + element.position
 
             element.Tick()
 
     def Render(self: VerticalLayout, surface: pg.Surface) -> None:
         container_surface = pg.Surface(self.size, pg.SRCALPHA)
 
+        y_offset = 0
+
         for element in self.elements:
+            element.relative_position.y = y_offset
+
             if type(element) == Text:
                 element.Render(
                     container_surface, max_width=self.size[0] - element.position.x
@@ -162,6 +166,7 @@ class VerticalLayout(BaseElement):
                 continue
 
             element.Render(container_surface)
+            y_offset += element.GetHeight()
 
         if DEBUG_RENDER:
             pg.draw.rect(container_surface, _getDebugColor(id(self)), ((0, 0), self.size), 1)
@@ -255,18 +260,21 @@ class Box(BaseElement):
     ) -> None:
         self.position = position
         self.color = color
-        self.size = size
+        self.size = pg.Vector2(size)
 
     def IsMouseHovering(self: Box) -> bool:
         return pg.Rect(self.position + self.relative_position, self.size).collidepoint(
             *pg.mouse.get_pos()
         )
 
+    def GetHeight(self: Box) -> int:
+        return self.size.y
+
     def Render(self: Box, surface: pg.Surface) -> None:
-        pg.draw.rect(surface, self.color, (self.position, self.size))
+        pg.draw.rect(surface, self.color, (self.position + self.relative_position, self.size))
 
         if DEBUG_RENDER:
-            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self.size), 1)
+            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position + self.relative_position, self.size), 1)
 
 
 class Pressable(BaseElement):

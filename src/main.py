@@ -58,6 +58,14 @@ vlayout.AddElement(
     )
 )
 
+vlayout.AddElement(
+    Box(
+        (0, 0),
+        (255, 0, 255),
+        (50, 50)
+    )
+)
+
 manager.AddElement(text)
 manager.AddElement(box)
 manager.AddElement(pressable)

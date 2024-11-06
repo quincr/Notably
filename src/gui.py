@@ -87,13 +87,17 @@ class Container(BaseElement):
         container_surface.fill((0, 128, 255))
 
         for element in self.elements:
+            if type(element) == Text:
+                element.Render(container_surface, max_width = self.size[0] - element.position.x)
+                continue
+
             element.Render(container_surface)
 
         surface.blit(container_surface, self.position)
 
 class Text(BaseElement):
     def __init__(self: Text, font: Font, text: str, size: int, color: pg.Color, position: pg.Vector2) -> None:
-        self.position = position
+        self.position = pg.Vector2(position)
         self.size = size
         self.text = text
         self.color = color
@@ -103,9 +107,43 @@ class Text(BaseElement):
     
     def Update(self: Text) -> None:
         self._renderred = self.font.Get(self.size).render(self.text, True, self.color)
-    
-    def Render(self: Text, surface: pg.Surface) -> None:
-        surface.blit(self._renderred, self.position)
+
+    def Render(self: Text, surface: pg.Surface, max_width: int = -1) -> None:
+        if max_width <= 0:
+            surface.blit(self._renderred, self.position)
+            return
+        
+        if self._renderred.get_width() <= max_width:
+            surface.blit(self._renderred, self.position)
+            return
+        
+        remaining_words = self.text.split(' ')
+
+        current_line = ''
+        current_y = 0
+        current_width = 0
+
+        while len(remaining_words) > 0:
+            this_word = remaining_words[0]
+
+            renderred_word = self.font.Get(self.size).render(this_word + ('' if current_line == '' else ' '), True, self.color)
+            if renderred_word.get_width() + current_width < max_width:
+                current_width += renderred_word.get_width()
+                current_line += ('' if current_line == '' else ' ') + this_word
+
+                remaining_words.remove(this_word)
+            else:
+                if current_width == 0:
+                    return
+
+                surface.blit(self.font.Get(self.size).render(current_line, True, self.color), self.position + pg.Vector2(0, current_y))
+
+                current_y += self.font.Get(self.size).render(current_line, True, self.color).get_height()
+                current_line = ''
+                current_width = 0
+
+        surface.blit(self.font.Get(self.size).render(current_line, True, self.color), self.position + pg.Vector2(0, current_y))
+
 
 class Box(BaseElement):
     def __init__(self: Box, position: pg.Vector2, color: pg.Color, size: pg.Vector2) -> None:

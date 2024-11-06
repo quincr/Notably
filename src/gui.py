@@ -32,6 +32,8 @@ class BaseElement():
     is_pressed: bool = False
     is_just_pressed: bool = False
 
+    relative_position: pg.Vector2 = pg.Vector2(0, 0)
+
     def __init__(self: BaseElement) -> None:
         pass
 
@@ -58,6 +60,37 @@ class Font():
         
         return self._font_register[size]
 
+class Container(BaseElement):
+    def __init__(self: Container, position: pg.Vector2, size: pg.Vector2) -> None:
+        self.position = position
+        self.size = size
+
+        self.elements: list[type[BaseElement]] = []
+    
+    def AddElement(self: Container, element: type[BaseElement]) -> None:
+        self.elements.append(element)
+    
+    def Tick(self: Container):
+        is_pressing = pg.mouse.get_pressed(3)[0]
+        just_pressed = pg.mouse.get_just_pressed()[0]
+
+        for element in self.elements:
+            element.is_hovering = element.IsMouseHovering()
+            element.is_pressed = is_pressing and element.is_hovering
+            element.is_just_pressed = just_pressed and element.is_hovering
+            element.relative_position = self.relative_position + self.position
+
+            element.Tick()
+    
+    def Render(self: Container, surface: pg.Surface) -> None:
+        container_surface = pg.Surface(self.size)
+        container_surface.fill((0, 128, 255))
+
+        for element in self.elements:
+            element.Render(container_surface)
+
+        surface.blit(container_surface, self.position)
+
 class Text(BaseElement):
     def __init__(self: Text, font: Font, text: str, size: int, color: pg.Color, position: pg.Vector2) -> None:
         self.position = position
@@ -81,7 +114,7 @@ class Box(BaseElement):
         self.size = size
 
     def IsMouseHovering(self: Box) -> bool:
-        return pg.Rect(self.position, self.size).collidepoint(*pg.mouse.get_pos())
+        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(*pg.mouse.get_pos())
 
     def Render(self: Box, surface: pg.Surface) -> None:
         pg.draw.rect(surface, self.color, (self.position, self.size))
@@ -99,7 +132,7 @@ class Pressable(BaseElement):
         self.event_args = event_args
     
     def IsMouseHovering(self: Pressable) -> bool:
-        return pg.Rect(self.position, self.size).collidepoint(*pg.mouse.get_pos())
+        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(*pg.mouse.get_pos())
 
     def Tick(self: Pressable) -> None:
         if self.is_just_pressed:

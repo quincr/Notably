@@ -32,6 +32,7 @@ class Manager:
             element.is_hovering = element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
             element.is_just_pressed = just_pressed and element.is_hovering
+            element.absolute_position = element.position
 
             element.Tick()
 
@@ -43,11 +44,14 @@ class Manager:
 
 
 class BaseElement:
+    position: pg.Vector2 = pg.Vector2(0, 0)
+
     is_hovering: bool = False
     is_pressed: bool = False
     is_just_pressed: bool = False
 
     relative_position: pg.Vector2 = pg.Vector2(0, 0)
+    absolute_position: pg.Vector2 = pg.Vector2(0, 0)
 
     def __init__(self: BaseElement) -> None:
         pass
@@ -63,6 +67,16 @@ class BaseElement:
 
     def Render(self: BaseElement, surface: pg.Surface) -> None:
         pass
+
+    def GetHeight(self: BaseElement) -> int:
+        # Required!
+
+        raise NotImplementedError()
+    
+    def GetWidth(self: BaseElement) -> int:
+        # Required!
+
+        raise NotImplementedError()
 
 
 class Font:
@@ -134,7 +148,7 @@ class VerticalLayout(BaseElement):
         self.elements.append(element)
 
     def IsMouseHovering(self: Container) -> bool:
-        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(
+        return pg.Rect(self.absolute_position, self.size).collidepoint(
             *pg.mouse.get_pos()
         )
 
@@ -143,13 +157,18 @@ class VerticalLayout(BaseElement):
         just_pressed = pg.mouse.get_just_pressed()[0]
         is_hovering_container = self.IsMouseHovering()
 
+        y_offset = 0
+
         for element in self.elements:
+            element.relative_position = self.relative_position + pg.Vector2(element.position)
+            element.absolute_position = self.absolute_position + pg.Vector2(element.position) + pg.Vector2(0, y_offset)
+
             element.is_hovering = is_hovering_container and element.IsMouseHovering()
             element.is_pressed = is_pressing and element.is_hovering
             element.is_just_pressed = just_pressed and element.is_hovering
-            element.relative_position = self.relative_position + element.position
 
             element.Tick()
+            y_offset += element.GetHeight()
 
     def Render(self: VerticalLayout, surface: pg.Surface) -> None:
         container_surface = pg.Surface(self.size, pg.SRCALPHA)
@@ -263,9 +282,12 @@ class Box(BaseElement):
         self.size = pg.Vector2(size)
 
     def IsMouseHovering(self: Box) -> bool:
-        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(
+        return pg.Rect(self.absolute_position, self.size).collidepoint(
             *pg.mouse.get_pos()
         )
+
+    def GetWidth(self: Box) -> int:
+        return self.size.x
 
     def GetHeight(self: Box) -> int:
         return self.size.y
@@ -289,7 +311,7 @@ class Pressable(BaseElement):
         event_args: tuple[Any] = (),
     ) -> None:
         self.position = position
-        self.size = size
+        self.size = pg.Vector2(size)
 
         self.passive_color = passive_color
         self.hover_color = hover_color
@@ -299,13 +321,19 @@ class Pressable(BaseElement):
         self.event_args = event_args
 
     def IsMouseHovering(self: Pressable) -> bool:
-        return pg.Rect(self.position + self.relative_position, self.size).collidepoint(
+        return pg.Rect(self.absolute_position, self.size).collidepoint(
             *pg.mouse.get_pos()
         )
 
     def Tick(self: Pressable) -> None:
         if self.is_just_pressed:
             self.event(self, *self.event_args)
+
+    def GetWidth(self: Box) -> int:
+        return self.size.x
+
+    def GetHeight(self: Box) -> int:
+        return self.size.y
 
     def Render(self: Pressable, surface: pg.Surface) -> None:
         _color = self.passive_color
@@ -315,7 +343,7 @@ class Pressable(BaseElement):
             else:
                 _color = self.hover_color
 
-        pg.draw.rect(surface, _color, (self.position, self.size))
+        pg.draw.rect(surface, _color, (self.position + self.relative_position, self.size))
 
         if DEBUG_RENDER:
-            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position, self.size), 1)
+            pg.draw.rect(surface, _getDebugColor(id(self)), (self.position + self.relative_position, self.size), 1)

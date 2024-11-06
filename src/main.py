@@ -16,6 +16,8 @@ def TestPressEvent(pressable: Pressable, test_arg_1: int, test_arg_2: str) -> No
 def TestPressContainerEvent(pressable: Pressable) -> None:
     print("Container Pressable field has been pressed.")
 
+def TestPressVLayoutEvent(pressable: Pressable) -> None:
+    print("Vertical layout Pressable field has been pressed.")
 
 font = Font("./assets/fonts/Garet-Book.ttf")
 text = Text(font, "This is test text.", 24, (255, 255, 255), pg.Vector2(5, 5))
@@ -59,10 +61,13 @@ vlayout.AddElement(
 )
 
 vlayout.AddElement(
-    Box(
-        (0, 0),
-        (255, 0, 255),
-        (50, 50)
+    Pressable(
+        (0 ,0),
+        (25, 25),
+        (128, 0, 56),
+        (56, 128, 0),
+        (128, 56, 0),
+        TestPressVLayoutEvent
     )
 )
 
